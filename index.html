@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#f6f4ed"><meta name="description" content="目標を動かして学ぶ逆運動学。2リンクアームで複数解、到達範囲、特異点を体験するインタラクティブ教材。"><title>IK Lab — 触ってわかる逆運動学</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<header><a class="brand" href="./"><span class="brand-mark">↗</span> IK Lab <small>ROBOTICS NOTEBOOK / 01</small></a><a href="https://github.com/yoshimasa1700/ik-lab">GitHub ↗</a></header>
+<main>
+<section class="intro"><div><p class="eyebrow">INVERSE KINEMATICS</p><h1>行きたい場所から、<br><em>関節の角度</em>を見つける。</h1></div><p class="lede">図の中をドラッグして、目標を動かそう。<br>2本のリンクだけで見えてくる、<br>逆運動学のしくみ。</p></section>
+<section class="lab" aria-label="運動学シミュレーター">
+<div class="workspace"><div class="workspace-top"><span>01 / 実験エリア</span><span id="status" role="status">到達可能</span></div>
+<svg id="scene" viewBox="0 0 720 600" tabindex="0" role="img" aria-label="2リンクアーム。IKモードでドラッグまたは矢印キーで目標を移動。Shiftで細かく移動。">
+<defs><pattern id="grid" width="56" height="56" patternUnits="userSpaceOnUse" x="360" y="310"><path d="M 56 0 L 0 0 0 56" fill="none" stroke="#dddcd2" stroke-width=".7"/></pattern></defs>
+<rect width="720" height="600" fill="url(#grid)"/>
+<g transform="translate(360 310) scale(56 -56)"><circle id="reach" class="reach"/><circle id="hole" class="hole"/><path d="M -6 0 H 6 M 0 -4.7 V 4.7" class="axis"/>
+<path id="ghost" class="ghost"/><path id="link1" class="link first"/><path id="link2" class="link second"/>
+<path id="error-line" class="error-line"/><circle r=".14" class="joint base"/><circle id="elbow" r=".12" class="joint"/><circle id="tip" r=".09" class="tip"/>
+<g id="target"><circle r=".22"/><path d="M -.34 0 H .34 M 0 -.34 V .34"/></g></g>
+<text x="699" y="301" class="svg-label">x</text><text x="370" y="35" class="svg-label">y</text><text x="338" y="337" class="svg-label">O</text><text id="target-label" class="target-label">目標</text>
+</svg>
+<div class="canvas-caption"><span><i class="dot green"></i>アーム <i class="dot orange"></i>目標 <span class="dash">┄</span>もう一方の解</span><span>1目盛 = 1 unit</span></div>
+<p id="hint" class="hint">ドラッグ / 矢印キーで目標を移動 · Shiftで微調整</p>
+<div class="readouts"><div><span>肩の角度 θ₁</span><strong id="a-value"></strong></div><div><span>肘の角度 θ₂</span><strong id="b-value"></strong></div><div><span>目標までの誤差</span><strong id="error-value"></strong></div></div>
+</div>
+<aside class="controls"><div class="control-heading"><h2>動きを試す</h2><button id="reset" class="text-button">リセット ↺</button></div>
+<div class="segmented" aria-label="操作モード"><button id="ik" aria-pressed="true">IK · 位置 → 角度</button><button id="fk" aria-pressed="false">FK · 角度 → 位置</button></div>
+<p id="mode-description" class="small">目標の位置から、2つの関節角を計算します。</p>
+<div id="position-controls"><label for="x">目標 x <output id="x-out"></output></label><input id="x" type="range" min="-5.5" max="5.5" step=".01" value="2.4"><label for="y">目標 y <output id="y-out"></output></label><input id="y" type="range" min="-4.5" max="4.5" step=".01" value="1.5"></div>
+<div id="angle-controls" hidden><label for="a">肩 θ₁ <output id="a-out"></output></label><input id="a" type="range" min="-180" max="180" step=".1"><label for="b">肘 θ₂ <output id="b-out"></output></label><input id="b" type="range" min="-180" max="180" step=".1"></div>
+<div class="branch-row"><span>解の分岐</span><button id="branch" aria-label="IKの解の分岐を切り替える">θ₂ 正 → 負へ切替</button></div>
+<label class="check"><input id="show-other" type="checkbox" checked> もう一方の解を重ねる</label>
+<details><summary>アームの長さを変える</summary><label for="l1">リンク L₁ <output id="l1-out"></output></label><input id="l1" type="range" min=".5" max="2.5" step=".1" value="2"><label for="l2">リンク L₂ <output id="l2-out"></output></label><input id="l2" type="range" min=".5" max="2.5" step=".1" value="1.5"></details>
+<div class="observation"><p class="eyebrow">いま起きていること</p><p id="observation" aria-live="polite"></p></div>
+</aside></section>
+<section class="experiments"><div class="section-heading"><p class="eyebrow">TRY THESE</p><h2>3つの小さな実験</h2></div><div class="experiment-grid">
+<button class="experiment" data-preset="branches"><span>01 — MULTIPLE SOLUTIONS</span><h3>同じ場所、違う姿勢。</h3><p>解を切り替えてみよう。手先を動かさず、肘の位置だけ変えられる？</p><b>2つの解を比べる ↗</b></button>
+<button class="experiment" data-preset="outside"><span>02 — WORKSPACE</span><h3>届かない場所がある。</h3><p>目標を外に出したら？ 長さの差がつくる、内側の空白も探してみよう。</p><b>到達範囲の外へ ↗</b></button>
+<button class="experiment" data-preset="singular"><span>03 — SINGULARITY</span><h3>まっすぐ伸びた、その先。</h3><p>伸ばし切ると2つの解が重なる。微小な動きを作れる方向にも注目。</p><b>特異点を観察する ↗</b></button>
+</div></section>
+<section class="theory"><div><p class="eyebrow">BEHIND THE MOTION</p><h2>動きと式を、<br>つなげてみる。</h2><p>θ₁はx軸からの角度、θ₂は第1リンクに対する角度。<br>反時計回りが正、長さは任意の単位です。</p></div><div class="equations">
+<article><h3>順運動学 / FK</h3><p>角度を決めると、手先の位置が決まる。</p><div class="formula">x = L₁ cos θ₁ + L₂ cos(θ₁ + θ₂)<br>y = L₁ sin θ₁ + L₂ sin(θ₁ + θ₂)</div></article>
+<article><h3>逆運動学 / IK</h3><p>余弦定理から肘の角度を求める。±が2つの姿勢の分岐。</p><div class="formula">c₂ = (x² + y² − L₁² − L₂²) / (2L₁L₂)<br>θ₂ = ± arccos(c₂)<br>θ₁ = atan2(y, x) − atan2(L₂ sin θ₂, L₁ + L₂ cos θ₂)</div><p class="numeric" id="numeric"></p></article>
+<article><h3>到達範囲と特異点</h3><div class="formula">|L₁ − L₂| ≤ √(x² + y²) ≤ L₁ + L₂<br>det J = L₁L₂ sin θ₂</div><p id="jacobian"></p><p>det J = 0ではヤコビアンの階数が落ち、瞬間的に作れる手先速度の方向が制限されます。リンクが等長で目標が原点なら、肩の角度を自由に選べる無限個の解があります。</p></article>
+</div></section>
+<footer><p>平面2自由度・位置のみの教材。関節制限、障害物、動力学、手先姿勢の指定は扱いません。<br>到達不能な場合は、目標に最も近い到達位置を表示します。IK解は移動経路の安全性を保証しません。</p><p>参考：<a href="https://courses.ideate.cmu.edu/16-375/f2022/ref/text/reference/two-link-kinematics.html">CMU · Two Link Kinematics ↗</a> / <a href="https://www.mathworks.com/help/symbolic/derive-and-apply-inverse-kinematics-to-robot-arm.html">MathWorks · Two-Link IK ↗</a></p><span>IK LAB / LEARN BY MOVING</span></footer>
+</main><script type="module" src="app.js"></script></body></html>
